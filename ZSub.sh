@@ -2,26 +2,36 @@
       		
 function subfinder(){
 	dom=${1}
-	out="sub-${dom}.txt"
-	command subfinder -d "${dom}" -v &>/dev/null -o "${out}"
-	if [[ ! -s "sub-${dom}.txt" ]]; then
-		echo "[[-]] No Subdomain Found"
-		exit 1
-	fi
-	
-	sort -u "${out}" -o "domain-${dom}.txt"
-       echo "Subdomain are saved in domain-https: sub-${dom}"
-       echo "Now Fuzzing Directories on ALL Subdomains::"
-       echo "PLEASE WAIT::"
+	if [[ -s "${dom}" ]]; then
+		echo "[[+]]Directory already Exist"
+		echo "[[+]]Output is Going Under it "
+		command subfinder -d "${dom}" -o "${dom}" -v &>/dev/null
+		#sort -u "${dom}/${dom}" -o "${dom}/domain-${dom}.txt"
+        	echo "[[+]]Subdomain are saved in "${dom}""
+        	echo "[[+]]Now Fuzzing Directories on ALL Subdomains::"
+        	echo "[[+]]PLEASE WAIT::"
+	elif	[[ ! -s "${dom}" ]]; then
+		$(mkdir "${dom}")
+		command subfinder -d "${dom}" -o "${dom}/${dom}" -v &>/dev/null
+		#sort -u "${dom}/${dom}" -o "${dom}/${out}domain-${dom}.txt"
+       		echo "[[+]]Subdomain are saved in domain-${dom}"
+       		#echo "[[+]]Total Subdomain are found =>" $(wc -l "${dom}""/domain-""${dom}")
+        	echo "[[+]]Now Fuzzing Directories on ALL Subdomains::"
+        	echo "[[+]]PLEASE WAIT::"
+        else
+        	exit 1
+        fi
+        
 }
 
 function katana(){
-	dom="${1}"
-	out="${dom}.txt"
+	dom="${dom}/domain-${1}}"
+	out="dir-${dom}.txt"
 	echo "Finding Directories in all SUBDOMAINS"
-	url=$(cat "domain-${dom}.txt")
+	url=$(cat "${dom}/domain-${dom}.txt")
 	if [[ ! -s ${url} ]]; then
 		echo "[[-]] Subdomain File Error"
+		echo "[[-]] Subdomains File maybe not present"
 		exit 1
 	fi
 	while read url; do
@@ -29,6 +39,7 @@ function katana(){
 	done
 
 }
+	exit 1
 
 function alivesub(){
 	dom="${1}"
@@ -39,21 +50,14 @@ function alivesub(){
 
 }
 
-if [[ "${1}" == "-u" && -n "${2}" ]]; then
-
+if [[ "${1}" == "-u" ]]; then
 	domain="${2}"
-
-        echo "Starting Enumeration on ${domain}"
-        	subfinder ${domain}
-        if [[ $? -eq 0 ]]; then
-        	katana ${domain}
-        fi
-	if [[ $? -eq 0 ]]; then
-                alivesub ${domain}
-        fi
-
+	echo "Starting Enumeration on ${domain}"
+        	subfinder ${domain} 
+	echo "Now Starting Katana"
+		katana ${domain}
 else
-        echo "No"
+        echo "Please Enter The Target URL!"
         exit 1
 fi
 
