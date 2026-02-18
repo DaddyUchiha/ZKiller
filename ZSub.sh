@@ -10,7 +10,7 @@ function subfinder(){
         	echo "[[+]]Subdomain are saved in "${dom}""
         	echo "[[+]]Now Fuzzing Directories on ALL Subdomains::"
         	echo "[[+]]PLEASE WAIT::"
-	elif	[[ ! -s "${dom}" ]]; then
+	else
 		$(mkdir "${dom}")
 		command subfinder -d "${dom}" -o "${dom}/${dom}" -v &>/dev/null
 		#sort -u "${dom}/${dom}" -o "${dom}/${out}domain-${dom}.txt"
@@ -18,10 +18,7 @@ function subfinder(){
        		#echo "[[+]]Total Subdomain are found =>" $(wc -l "${dom}""/domain-""${dom}")
         	echo "[[+]]Now Fuzzing Directories on ALL Subdomains::"
         	echo "[[+]]PLEASE WAIT::"
-        else
-        	exit 1
-        fi
-        
+	fi
 }
 
 function katana(){
@@ -34,28 +31,28 @@ function katana(){
 		echo "[[-]] Subdomains File maybe not present"
 		exit 1
 	fi
-	while read url; do
-		katana -list "${url}" -v -o "${out}"
-	done
+	while IFS= read url; do
+		katana -u ${subdomain}" -v -o "${out}"
+	done < "${dom}/domain-${1}"
 
 }
 	exit 1
 
 function alivesub(){
-	dom="${1}"
-	out="alive-${1}.txt"
+	dom="${dom}/domain-${dom}"
+	out="alive-${dom}.txt"
 	while read url; do
-                cat ${dom} | httpx -mc 200 -sc | tee "$out"
+                cat ${dom} | httpx -mc 200 -sc | tee "${out}"
         done
 
 }
 
-if [[ "${1}" == "-u" ]]; then
+if [[ "${1}" == "-u" || -n "${2}" ]]; then
 	domain="${2}"
 	echo "Starting Enumeration on ${domain}"
         	subfinder ${domain} 
-	echo "Now Starting Katana"
-		katana ${domain}
+	echo "Now Checking Alive Subdomains Katana"
+		katana ${alivesub}
 else
         echo "Please Enter The Target URL!"
         exit 1
